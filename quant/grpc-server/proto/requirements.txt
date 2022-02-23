@@ -29,9 +29,6 @@ MarkupSafe
 matplotlib
 matplotlib-inline
 mistune
-mkl-fft
-mkl-random
-mkl-service
 munkres
 nbclient
 nbconvert
