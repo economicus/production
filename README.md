@@ -1,158 +1,36 @@
 # Economicus
-이코노미쿠스 백엔드 서버 API입니다.\
-환경변수에 대한 내용은 공개하지 않으니 따로 연락주시길 바랍니다.
-> .env 파일 설정 없이 서버 구동 불가합니다.\
-> 자체적인 .env 파일을 만들거나 다운 받은 후에 프로젝트 루트 폴더에 넣어 사용하십시오.
 
-## License
-작성 예정
-
-## Overview
-작성 예정
+> submodule 사용법을 설명하기 위해 임시 작성했습니다. 추후 수정이 필요합니다.
 
 ## Requirements
-도커로 사용 시,
 
-- [docker](https://www.docker.com/products/docker-desktop)
-- [docker-compose](https://docs.docker.com/compose/)
+- `.env` `.env.mysql` `nginx.conf`
+- 실행 방법
 
-도커를 사용하지 않을 시,
+  ```shell
+  git clone --recursive https://github.com/economicus/production
 
-- [mysql](https://www.mysql.com/)
-- [golang](https://go.dev/)
+  docker-compose up -d --build
+  ```
 
-## Installation
-도커 사용 시,
+## Submodule 추가 설명
 
-```shell
-$ git clone https://github.com/economicus/economicus-be.git
-$ cd economicus-be
-# set up .env file in root folder
-$ docker-compose up -d --build
-```
+### submodule 업데이트
 
-도커 사용하지 않을 시,
+economicus-fe 서브모듈을 최신 버전으로 업데이트 하고 싶은 경우, 다음의 명령어를 사용해주세요.
 
 ```shell
-$ git clone https://github.com/economicus/economicus-be.git
-$ cd ./economicus-be/app
-# set up environments
-$ make build_and_run
+git submodule update --remote
 ```
 
-## Go Packages
-- Routing: [gin](https://github.com/gin-gonic/gin.git)
-- ORM: [gorm](https://gorm.io/)
-- Logging: [logrus](https://github.com/sirupsen/logrus)
-- JWT: [jwt-go](https://github.com/dgrijalva/jwt-go.git)
+위와 같이 서브모듈 업데이트 후 commit을 하면, production 레포지토리에 반영됩니다.
 
-
-## Usage
-깃 위키에 담을 예정
-
-## Layout
-
-```text
-economicus
-│
-├── README.md
-├── .gitignore
-├── .env
-├── docker-compose.yml
-│
-├── volumes
-│   │-- mysql
-│   └── nginx
-│
-├── quant
-│   └── 
-│
-└── main
-    ├── go.mod
-    ├── go.sum
-    ├── Makefile
-    ├── Dockerfile
-    ├── cmd
-    │   └── economicus
-    │       └── main.go
-    │
-    ├── commons
-    │   ├── converter
-    │   │   ├── converter_test.go
-    │   │   ├── interface-converter.go
-    │   │   └── string-converter.go
-    │   ├── bcrypt.go
-    │   └── bcrypt_test.go
-    │
-    ├── config
-    │   ├── app.go
-    │   ├── aws.go
-    │   ├── database.go
-    │   ├── jwt.go
-    │   └── util.go
-    │
-    │
-    ├── internal
-    │   ├── api
-    │   │   ├── handler
-    │   │   │   ├── auth.go
-    │   │   │   ├── comment.go
-    │   │   │   ├── helper.go
-    │   │   │   ├── quant.go
-    │   │   │   ├── reply.go
-    │   │   │   └── user.go
-    │   │   ├── hateos
-    │   │   │   └── hateos.go
-    │   │   ├── repository
-    │   │   │   ├── auth.go
-    │   │   │   ├── comment.go
-    │   │   │   ├── comment_test.go
-    │   │   │   ├── quant.go
-    │   │   │   ├── quant_test.go
-    │   │   │   ├── reply.go
-    │   │   │   ├── reply_test.go
-    │   │   │   ├── repository.go
-    │   │   │   ├── repository_test.go
-    │   │   │   ├── user.go
-    │   │   │   └── user_test.go
-    │   │   ├── routes
-    │   │   │   ├── auth.go
-    │   │   │   ├── comment.go
-    │   │   │   ├── quant.go
-    │   │   │   ├── reply.go
-    │   │   │   └── user.go
-    │   │   ├── service
-    │   │   │   ├── auth.go
-    │   │   │   ├── comment.go
-    │   │   │   ├── quant.go
-    │   │   │   ├── reply.go
-    │   │   │   └── user.go
-    │   │   ├── token
-    │   │   │   └── token.go
-    │   │   ├── api.go
-    │   │   ├── logger.go
-    │   │   └── middleware.go
-    │   ├── drivers
-    │   │   ├── aws.go
-    │   │   └── database.go
-    │   └── models
-    │       ├── comment.go
-    │       ├── error.go
-    │       ├── models.go
-    │       ├── object.go
-    │       ├── profile.go
-    │       ├── quant.go
-    │       ├── quant-option.go
-    │       ├── quant-result.go
-    │       ├── query-option.go
-    │       ├── reply.go
-    │       └── user.go
-    │   
-    ├── script
-    │   ├── run.sh
-    │   └──
-    │
-    └── tests
-        ├──
-        └──
+```shell
+git add .
+git commit -m "chore: economicus-fe update" # 커밋 메세지는 마음대로 작성해주세요.
 ```
+
+### frontend 작업 방법
+
+- 작업(코드 수정, 커밋, 푸쉬, PR...)은 production 레포지토리가 아닌, economicus-fe 레포지토리에서 합니다.
+- economicus-fe 레포지토리에 수정사항(새로운 commit)이 있다면, production 레포지토리에서 `git submodule update --remote`로 업데이트 후, `docker-compose up -d --build` 명령어 등을 통해 테스트해볼 수 있습니다.
