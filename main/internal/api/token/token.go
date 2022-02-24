@@ -1,10 +1,10 @@
 package token
 
 import (
-	"economicus/commons/converter"
 	"economicus/config"
 	"fmt"
 	"github.com/golang-jwt/jwt"
+	"strconv"
 	"time"
 )
 
@@ -61,7 +61,11 @@ func (m *JwtManager) Validate(signedToken string) (uint, error) {
 	if !token.Valid {
 		return 0, fmt.Errorf("invalid token")
 	}
-	return converter.StrToUint(claims.Id)
+	userID, err := strconv.ParseUint(claims.Id, 10, 64)
+	if err != nil {
+		return 0, err
+	}
+	return uint(userID), nil
 }
 
 func createToken(id uint, c *config.JwtConfig, subject string) (string, error) {

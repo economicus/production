@@ -11,8 +11,10 @@ import (
 	"economicus/internal/api/token"
 	"economicus/internal/drivers"
 	"fmt"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
+	"time"
 )
 
 type Manager struct {
@@ -32,8 +34,20 @@ func NewManager(app *config.AppConfig, db *drivers.DB) *Manager {
 	aws := drivers.NewAWS()
 	h := hateos.NewHateos(app)
 	authMid := middleware.NewAuthMiddleware(db, jwtMan)
+	r := gin.Default()
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:3000"},
+		AllowMethods:     []string{"PUT", "PATCH", "GET", "POST", "DELETE"},
+		AllowHeaders:     []string{"Content-Type", "Authorization", "Origin"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		AllowOriginFunc: func(origin string) bool {
+			return origin == "https://github.com"
+		},
+		MaxAge: 12 * time.Hour,
+	}))
 	return &Manager{
-		routes: gin.Default(),
+		routes: r,
 		mid:    authMid,
 		app:    app,
 		db:     db,

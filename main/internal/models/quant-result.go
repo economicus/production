@@ -1,7 +1,7 @@
 package models
 
 import (
-	"economicus/grpc/proto"
+	"economicus/proto"
 	"fmt"
 	"time"
 )
@@ -43,12 +43,17 @@ func (qr *QuantResult) AddKospiData() error {
 	startTime := qr.ChartData.StartDate
 	idx := kospiData.Date[startTime]
 	if idx < dataLen {
-		return fmt.Errorf("kospi data doesn't match")
+		return fmt.Errorf("error in AddKospiData got wrong data: 'idx':%d, 'dataLen':%d", idx, dataLen)
 	}
 
-	for i := idx; i > idx-dataLen; i-- {
+	for i := idx; i >= idx-dataLen; i-- {
+		if i < 0 {
+			logger.Errorf("error in AddKospiData: got negative index: 'i': %d", idx)
+			return fmt.Errorf("error in AddKospiData: got negative index: 'i': %d", idx)
+		}
 		kospiVal = append(kospiVal, kospiData.IndexVal[i])
 	}
 	qr.ChartData.ProfitKospiData = kospiVal
+
 	return nil
 }

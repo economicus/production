@@ -2,7 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-import quant_pb2 as quant__pb2
+from proto import quant_pb2 as quant__pb2
 
 
 class QuantStub(object):

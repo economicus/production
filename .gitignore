@@ -79,7 +79,7 @@ fabric.properties
 /.env
 /volumes
 !/scripts/
-!/.env.mysql
+/.env.mysql
 
 ## front
 # dependencies

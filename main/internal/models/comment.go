@@ -1,7 +1,6 @@
 package models
 
 import (
-	"economicus/commons/converter"
 	"gorm.io/gorm"
 )
 
@@ -32,5 +31,9 @@ func (c *Comment) GetOwnerID() uint {
 }
 
 func (c *Comment) ConvToMap() map[string]interface{} {
-	return converter.InterfaceToMap(c)
+	m := map[string]interface{}{}
+	m["user_id"] = c.UserID
+	m["quant_id"] = c.QuantID
+	m["content"] = c.Content
+	return m
 }

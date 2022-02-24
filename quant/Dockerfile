@@ -13,4 +13,3 @@ WORKDIR /app
 
 RUN python -m pip install --upgrade pip && \
     pip install -r requirements.txt
-#    conda install -c conda-forge --yes --file requirements.txt

@@ -17,8 +17,7 @@ type Kospi struct {
 }
 
 func NewKospi() *Kospi {
-	//file, err := os.Open("internal/models/kospi/kospi.csv")
-	file, err := os.Open("main/internal/models/kospi/kospi.csv")
+	file, err := os.Open("internal/models/kospi/kospi.csv")
 	if err != nil {
 		fmt.Println(err.Error())
 	}

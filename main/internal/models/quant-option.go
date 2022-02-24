@@ -1,7 +1,7 @@
 package models
 
 import (
-	"economicus/grpc/proto"
+	"economicus/proto"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	"gorm.io/gorm"
 	"time"

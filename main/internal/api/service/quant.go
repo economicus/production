@@ -2,10 +2,10 @@ package service
 
 import (
 	"context"
-	"economicus/grpc/proto"
 	"economicus/internal/api/repository"
 	ecoerror "economicus/internal/error"
 	"economicus/internal/models"
+	"economicus/proto"
 	"fmt"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -43,23 +43,22 @@ func (s *QuantService) CreateQuant(userID uint, request *models.QuantRequest) (*
 		return nil, err
 	}
 
-	//quant := models.NewQuant(userID, request.Name)
-	//quantID, err := s.repo.CreateQuant(quant)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//
-	//request.QuantID = quantID
+	quant := models.NewQuant(userID, request.Name)
+	quantID, err := s.repo.CreateQuant(quant)
+	if err != nil {
+		return nil, err
+	}
+
+	request.QuantID = quantID
 	request.QuantID = uint(1505)
 	option := request.ToQuantOption()
 
-	//if err = s.repo.CreateQuantOption(option); err != nil {
-	//	return nil, err
-	//}
+	if err = s.repo.CreateQuantOption(option); err != nil {
+		return nil, err
+	}
 
 	protoData := option.ToRequest()
-	//conn, err := grpc.Dial("172.17.0.1:9000", grpc.WithTransportCredentials(insecure.NewCredentials()))
-	conn, err := grpc.Dial("localhost:9000", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.Dial("172.17.0.1:9000", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, err
 	}
