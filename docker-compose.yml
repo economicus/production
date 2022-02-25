@@ -56,7 +56,7 @@ services:
     container_name: quant
     restart: always
     ports:
-      - "${GRPC_INSECURE_PORT}:${GRPC_INSECURE_PORT}"
+      - "9000:9000"
     command: python3 main.py
 
   db:

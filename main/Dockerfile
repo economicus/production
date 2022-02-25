@@ -7,7 +7,7 @@ RUN mkdir /app
 ADD . /app
 WORKDIR /app
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o app cmd/economicus/main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -o app cmd/economicus/*.go
 
 FROM alpine:latest AS production
 

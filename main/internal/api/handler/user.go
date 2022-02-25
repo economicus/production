@@ -1,57 +1,53 @@
 package handler
 
 import (
-	"economicus/internal/api/hateos"
-	"economicus/internal/api/service"
-	"economicus/internal/models"
-	"fmt"
 	"github.com/gin-gonic/gin"
+	"main/internal/api/service"
+	e "main/internal/core/error"
+	"main/internal/core/model"
+	"main/internal/core/model/request"
 	"net/http"
 )
 
 type UserHandler struct {
 	service *service.UserService
-	hateos  *hateos.Hateos
 }
 
-func NewUserHandler(s *service.UserService, h *hateos.Hateos) *UserHandler {
+func NewUserHandler(s *service.UserService) *UserHandler {
 	return &UserHandler{
 		service: s,
-		hateos:  h,
 	}
 }
 
 // Register creates a user with a profile
 func (h *UserHandler) Register(ctx *gin.Context) {
-	var data models.RegisterRequest
+	var req request.RegisterRequest
 
-	if err := ctx.ShouldBindJSON(&data); err != nil {
-		sendErrMsg(ctx, err, "")
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		sendJsonParsingErr(ctx, err)
 		return
 	}
 
-	if err := h.service.Register(&data); err != nil {
-		sendErrMsg(ctx, err, "")
+	if err := h.service.Register(&req); err != nil {
+		sendErr(ctx, err)
 		return
 	}
 
-	ctx.JSON(http.StatusCreated, gin.H{
-		"links": []map[string]string{h.hateos.LinkToLogin()},
-	})
+	ctx.JSON(http.StatusCreated, nil)
 }
 
 // GetAllUsers returns all user
 func (h *UserHandler) GetAllUsers(ctx *gin.Context) {
-	option := models.NewQueryOption()
+	option := model.NewQuery()
 
 	if err := ctx.BindQuery(option); err != nil {
-		sendQueryBindingErrMsg(ctx, err.Error())
+		sendErr(ctx, err)
 		return
 	}
 
 	users, err := h.service.GetUsers(option)
 	if err != nil {
-		sendErrMsg(ctx, err, "")
+		sendErr(ctx, err)
 		return
 	}
 
@@ -62,21 +58,20 @@ func (h *UserHandler) GetAllUsers(ctx *gin.Context) {
 func (h *UserHandler) GetUser(ctx *gin.Context) {
 	user, err := getUserFromContext(ctx)
 	if err != nil {
-		sendErrMsg(ctx, err, "")
+		sendErr(ctx, err)
 		return
 	}
 
-	userID, err := extractUserId(user, ctx.Query("user_id"))
+	userID, err := extractUserId(ctx)
 	if err != nil {
-		sendErrMsg(ctx, err, "")
-		return
+		userID = user.ID
 	}
 
 	fields := getFieldsFromContext(ctx)
 
-	resp, err := h.service.GetUserDataWithFields(userID, fields)
+	resp, err := h.service.GetUser(userID, fields)
 	if err != nil {
-		sendErrMsg(ctx, err, "")
+		sendErr(ctx, err)
 		return
 	}
 
@@ -87,13 +82,13 @@ func (h *UserHandler) GetUser(ctx *gin.Context) {
 func (h *UserHandler) DeleteUser(ctx *gin.Context) {
 	user, err := getUserFromContext(ctx)
 	if err != nil {
-		sendErrMsg(ctx, err, "")
+		sendErr(ctx, err)
 		return
 	}
 
 	err = h.service.DeleteUser(user.ID)
 	if err != nil {
-		sendInternalErrMsg(ctx)
+
 		return
 	}
 
@@ -102,23 +97,23 @@ func (h *UserHandler) DeleteUser(ctx *gin.Context) {
 
 // EditUserProfile edit a user profile
 func (h *UserHandler) EditUserProfile(ctx *gin.Context) {
-	request := map[string]interface{}{}
+	var req model.Profile
 
 	user, err := getUserFromContext(ctx)
 	if err != nil {
-		sendErrMsg(ctx, err, "")
+		sendErr(ctx, err)
 		return
 	}
 
-	err = ctx.ShouldBindJSON(&request)
+	err = ctx.ShouldBindJSON(&req)
 	if err != nil {
-		sendErrMsgWithCode(ctx, http.StatusBadRequest, fmt.Sprintf("error while parsing json: %v", err))
+		sendJsonParsingErr(ctx, err)
 		return
 	}
 
-	err = h.service.UpdateProfile(user.ID, request)
+	err = h.service.UpdateProfile(user.ID, &req)
 	if err != nil {
-		sendInternalErrMsg(ctx)
+		sendErr(ctx, err)
 		return
 	}
 
@@ -129,20 +124,20 @@ func (h *UserHandler) EditUserProfile(ctx *gin.Context) {
 func (h *UserHandler) UploadUserProfileImage(ctx *gin.Context) {
 	user, err := getUserFromContext(ctx)
 	if err != nil {
-		sendErrMsg(ctx, err, "")
+		sendErr(ctx, err)
 		return
 	}
 
 	file, header, err := ctx.Request.FormFile("profile_image")
 	if err != nil {
-		sendErrMsgWithCode(ctx, http.StatusBadRequest, fmt.Sprintf("error while getting profile_image: %s", err))
+		sendErr(ctx, e.ErrInvalidFile)
 		return
 	}
 	defer file.Close()
 
 	err = h.service.UploadProfileImage(user.ID, file, header)
 	if err != nil {
-		sendInternalErrMsg(ctx)
+		sendErr(ctx, err)
 		return
 	}
 
@@ -153,38 +148,34 @@ func (h *UserHandler) UploadUserProfileImage(ctx *gin.Context) {
 func (h *UserHandler) GetFollowings(ctx *gin.Context) {
 	user, err := getUserFromContext(ctx)
 	if err != nil {
-		sendErrMsg(ctx, err, "")
+		sendErr(ctx, err)
 		return
 	}
 
 	followings, err := h.service.GetFollowings(user.ID)
 	if err != nil {
-		sendInternalErrMsg(ctx)
+		sendErr(ctx, err)
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{
-		"users": followings,
-	})
+	ctx.JSON(http.StatusOK, followings)
 }
 
 // GetFollowers returns list of followers
 func (h *UserHandler) GetFollowers(ctx *gin.Context) {
 	user, err := getUserFromContext(ctx)
 	if err != nil {
-		sendErrMsg(ctx, err, "")
+		sendErr(ctx, err)
 		return
 	}
 
 	followings, err := h.service.GetFollowers(user.ID)
 	if err != nil {
-		sendInternalErrMsg(ctx)
+		sendErr(ctx, err)
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{
-		"users": followings,
-	})
+	ctx.JSON(http.StatusOK, followings)
 }
 
 // FollowUser refreshes access token
@@ -195,19 +186,19 @@ func (h *UserHandler) FollowUser(ctx *gin.Context) {
 
 	user, err := getUserFromContext(ctx)
 	if err != nil {
-		sendErrMsg(ctx, err, "")
+		sendErr(ctx, err)
 		return
 	}
 
 	err = ctx.ShouldBindJSON(&data)
 	if err != nil {
-		sendJsonBindingErrMsg(ctx, err.Error())
+		sendJsonParsingErr(ctx, err)
 		return
 	}
 
 	err = h.service.Follow(user.ID, data.FollowerID)
 	if err != nil {
-		sendErrMsg(ctx, err, "")
+		sendErr(ctx, err)
 		return
 	}
 
@@ -222,19 +213,19 @@ func (h *UserHandler) UnfollowUser(ctx *gin.Context) {
 
 	user, err := getUserFromContext(ctx)
 	if err != nil {
-		sendErrMsg(ctx, err, "")
+		sendErr(ctx, err)
 		return
 	}
 
 	err = ctx.ShouldBindJSON(&data)
 	if err != nil {
-		sendJsonBindingErrMsg(ctx, err.Error())
+		sendJsonParsingErr(ctx, err)
 		return
 	}
 
 	err = h.service.UnFollow(user.ID, data.FollowingID)
 	if err != nil {
-		sendInternalErrMsg(ctx)
+		sendErr(ctx, err)
 		return
 	}
 
@@ -245,13 +236,13 @@ func (h *UserHandler) UnfollowUser(ctx *gin.Context) {
 func (h *UserHandler) GetFavoriteQuants(ctx *gin.Context) {
 	user, err := getUserFromContext(ctx)
 	if err != nil {
-		sendErrMsg(ctx, err, "")
+		sendErr(ctx, err)
 		return
 	}
 
 	quants, err := h.service.GetFavoriteQuants(user.ID)
 	if err != nil {
-		sendInternalErrMsg(ctx)
+		sendErr(ctx, err)
 		return
 	}
 
@@ -269,19 +260,19 @@ func (h *UserHandler) AddToFavoriteQuants(ctx *gin.Context) {
 
 	user, err := getUserFromContext(ctx)
 	if err != nil {
-		sendErrMsg(ctx, err, "")
+		sendErr(ctx, err)
 		return
 	}
 
 	err = ctx.ShouldBindJSON(&data)
 	if err != nil {
-		sendJsonBindingErrMsg(ctx, err.Error())
+		sendJsonParsingErr(ctx, err)
 		return
 	}
 
 	err = h.service.AddToFavoriteQuants(user.ID, data.QuantID)
 	if err != nil {
-		sendInternalErrMsg(ctx)
+		sendErr(ctx, err)
 		return
 	}
 
@@ -296,19 +287,19 @@ func (h *UserHandler) DeleteFromFavoriteQuants(ctx *gin.Context) {
 
 	user, err := getUserFromContext(ctx)
 	if err != nil {
-		sendErrMsg(ctx, err, "")
+		sendErr(ctx, err)
 		return
 	}
 
 	err = ctx.ShouldBindJSON(&data)
 	if err != nil {
-		sendJsonBindingErrMsg(ctx, err.Error())
+		sendJsonParsingErr(ctx, err)
 		return
 	}
 
 	err = h.service.DeleteFromFavoriteQuants(user.ID, data.QuantID)
 	if err != nil {
-		sendInternalErrMsg(ctx)
+		sendErr(ctx, err)
 		return
 	}
 

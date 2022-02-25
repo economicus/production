@@ -1,24 +1,24 @@
 package service
 
 import (
-	"economicus/internal/api/repository"
-	"economicus/internal/api/token"
+	"main/internal/api/repo"
+	"main/internal/pkg/jwt"
 )
 
 type AuthService struct {
-	repo repository.AuthRepositoryFactory
+	repo *repo.AuthRepo
 }
 
-func NewAuthService(repo repository.AuthRepositoryFactory) *AuthService {
+func NewAuthService(repo *repo.AuthRepo) *AuthService {
 	return &AuthService{
 		repo: repo,
 	}
 }
 
-func (s *AuthService) Login(email, password string) (*token.JwtToken, error) {
-	return s.repo.AuthenticateWithLocal(email, password)
+func (s *AuthService) LoginInLocal(email, password string) (*jwt.Token, error) {
+	return s.repo.AuthenticateInLocal(email, password)
 }
 
-func (s *AuthService) RefreshToken(refreshToken string) (*token.JwtToken, error) {
+func (s *AuthService) RefreshToken(refreshToken string) (*jwt.Token, error) {
 	return s.repo.RefreshToken(refreshToken)
 }

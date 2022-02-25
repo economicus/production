@@ -1,9 +1,10 @@
 package handler
 
 import (
-	"economicus/internal/api/service"
-	"economicus/internal/models"
 	"github.com/gin-gonic/gin"
+	"main/internal/api/service"
+	"main/internal/core/model"
+	"main/internal/core/model/request"
 	"net/http"
 )
 
@@ -17,24 +18,24 @@ func NewQuantHandler(s *service.QuantService) *QuantHandler {
 	}
 }
 
-// GetAllQuants returns list of quant models
+// GetAllQuants returns list of quant model
 func (h *QuantHandler) GetAllQuants(ctx *gin.Context) {
-	option := models.NewQueryOption()
+	option := model.NewQuery()
 
 	if err := ctx.BindQuery(option); err != nil {
-		sendQueryBindingErrMsg(ctx, err.Error())
+		sendJsonParsingErr(ctx, err)
 		return
 	}
 
 	user, err := getUserFromContext(ctx)
 	if err != nil {
-		sendErrMsg(ctx, err, "")
+		sendErr(ctx, err)
 		return
 	}
 
 	quants, err := h.service.GetAllQuants(user.ID, option)
 	if err != nil {
-		sendInternalErrMsg(ctx)
+		sendErr(ctx, err)
 		return
 	}
 
@@ -42,107 +43,69 @@ func (h *QuantHandler) GetAllQuants(ctx *gin.Context) {
 		"count":  len(quants),
 		"quants": quants,
 	})
-}
-
-// GetFollowingsQuants returns quants of followings
-func (h *QuantHandler) GetFollowingsQuants(ctx *gin.Context) {
-	option := models.NewQueryOption()
-
-	if err := ctx.BindQuery(option); err != nil {
-		sendQueryBindingErrMsg(ctx, err.Error())
-		return
-	}
-
-	user, err := getUserFromContext(ctx)
-	if err != nil {
-		sendErrMsg(ctx, err, "")
-		return
-	}
-
-	quants, err := h.service.GetFollowingsQuants(user.ID, option)
-	if err != nil {
-		sendInternalErrMsg(ctx)
-		return
-	}
-
-	ctx.JSON(http.StatusOK, gin.H{
-		"count":  len(quants),
-		"quants": quants,
-	})
-}
-
-func (h *QuantHandler) GetQuantData(ctx *gin.Context) {
-	var data models.QuantRequest
-
-	if err := ctx.ShouldBindJSON(&data); err != nil {
-		sendJsonBindingErrMsg(ctx, err.Error())
-		return
-	}
-
-	ctx.JSON(http.StatusOK, nil)
 }
 
 // GetQuant returns a quant models
 func (h *QuantHandler) GetQuant(ctx *gin.Context) {
 	user, err := getUserFromContext(ctx)
 	if err != nil {
-		sendErrMsg(ctx, err, "")
+		sendErr(ctx, err)
 		return
 	}
 
 	quant, err := h.service.GetQuant(user.ID)
 	if err != nil {
-		sendInternalErrMsg(ctx)
+		sendErr(ctx, err)
 		return
 	}
 
 	ctx.JSON(http.StatusOK, quant)
 }
 
-// CreateQuant creates a quant models
+// CreateQuant creates a quant model
 func (h *QuantHandler) CreateQuant(ctx *gin.Context) {
-	var request models.QuantRequest
+	var req request.QuantC
 
 	user, err := getUserFromContext(ctx)
 	if err != nil {
-		sendErrMsg(ctx, err, "")
+		sendErr(ctx, err)
 		return
 	}
 
-	err = ctx.ShouldBindJSON(&request)
+	err = ctx.ShouldBindJSON(&req)
 	if err != nil {
-		sendJsonBindingErrMsg(ctx, err.Error())
+		sendJsonParsingErr(ctx, err)
 		return
 	}
 
-	res, err := h.service.CreateQuant(user.ID, &request)
+	res, err := h.service.CreateQuant(user.ID, &req)
 	if err != nil {
-		sendErrMsg(ctx, err, "")
+		sendErr(ctx, err)
 		return
 	}
 
 	ctx.JSON(http.StatusCreated, res)
 }
 
-// UpdateQuant updates a quant models
+// UpdateQuant updates a quant model
 func (h *QuantHandler) UpdateQuant(ctx *gin.Context) {
-	request := map[string]interface{}{}
+	var req request.QuantE
 
 	user, err := getUserFromContext(ctx)
 	if err != nil {
-		sendErrMsg(ctx, err, "")
+		sendErr(ctx, err)
 		return
 	}
 
-	err = ctx.ShouldBindJSON(&request)
+	err = ctx.ShouldBindJSON(&req)
 	if err != nil {
-		sendJsonBindingErrMsg(ctx, err.Error())
+		sendJsonParsingErr(ctx, err)
 		return
 	}
 
-	err = h.service.UpdateQuant(user.ID, request)
+	err = h.service.UpdateQuant(user.ID, &req)
 	if err != nil {
-		sendInternalErrMsg(ctx)
+		sendErr(ctx, err)
 		return
 	}
 	ctx.JSON(http.StatusNoContent, nil)
@@ -150,49 +113,49 @@ func (h *QuantHandler) UpdateQuant(ctx *gin.Context) {
 
 // UpdateQuantOption updates the quant's option
 func (h *QuantHandler) UpdateQuantOption(ctx *gin.Context) {
-	var request models.QuantOption
+	var req model.QuantOption
 
 	user, err := getUserFromContext(ctx)
 	if err != nil {
-		sendErrMsg(ctx, err, "")
+		sendErr(ctx, err)
 		return
 	}
 
-	err = ctx.ShouldBindJSON(&request)
+	err = ctx.ShouldBindJSON(&req)
 	if err != nil {
-		sendJsonBindingErrMsg(ctx, err.Error())
+		sendJsonParsingErr(ctx, err)
 		return
 	}
 
-	err = h.service.UpdateQuantOption(user.ID, &request)
+	err = h.service.UpdateQuantOption(user.ID, &req)
 	if err != nil {
-		sendInternalErrMsg(ctx)
+		sendErr(ctx, err)
 		return
 	}
 	ctx.JSON(http.StatusNoContent, nil)
 }
 
-// DeleteQuant deletes a quant models
+// DeleteQuant deletes a quant model
 func (h *QuantHandler) DeleteQuant(ctx *gin.Context) {
-	var request struct {
+	var req struct {
 		QuantID uint `json:"quant_id"`
 	}
 
 	user, err := getUserFromContext(ctx)
 	if err != nil {
-		sendErrMsg(ctx, err, "")
+		sendErr(ctx, err)
 		return
 	}
 
-	err = ctx.ShouldBindJSON(&request)
+	err = ctx.ShouldBindJSON(&req)
 	if err != nil {
-		sendJsonBindingErrMsg(ctx, err.Error())
+		sendJsonParsingErr(ctx, err)
 		return
 	}
 
-	err = h.service.DeleteQuant(user.ID, request.QuantID)
+	err = h.service.DeleteQuant(user.ID, req.QuantID)
 	if err != nil {
-		sendInternalErrMsg(ctx)
+		sendErr(ctx, err)
 		return
 	}
 	ctx.JSON(http.StatusNoContent, nil)

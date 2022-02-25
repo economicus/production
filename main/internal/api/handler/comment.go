@@ -1,135 +1,110 @@
 package handler
 
 import (
-	"economicus/internal/api/hateos"
-	"economicus/internal/api/service"
-	"economicus/internal/models"
-	"fmt"
 	"github.com/gin-gonic/gin"
+	"main/internal/api/service"
+	e "main/internal/core/error"
+	"main/internal/core/model"
 	"net/http"
-	"strconv"
 )
 
 type CommentHandler struct {
-	service *service.CommentService
-	hateos  *hateos.Hateos
+	s *service.CommentService
 }
 
-func NewCommentHandler(s *service.CommentService, h *hateos.Hateos) *CommentHandler {
+func NewCommentHandler(s *service.CommentService) *CommentHandler {
 	return &CommentHandler{
-		service: s,
-		hateos:  h,
+		s: s,
 	}
 }
 
-// GetCommentsAndReplies returns all comments and replies of a quant models
+// GetCommentsAndReplies returns all comments and replies of a quant model
 func (h *CommentHandler) GetCommentsAndReplies(ctx *gin.Context) {
-	quantIdStr := ctx.Query("quant_id")
-	if quantIdStr == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": "error while getting quant id",
-		})
+	var q struct {
+		QuantID uint `json:"quant_id"`
+	}
+
+	if err := ctx.BindQuery(&q); err != nil {
+		sendErr(ctx, e.ErrInvalidQuery)
 		return
 	}
-	quantID, err := strconv.ParseUint(quantIdStr, 10, 64)
+
+	comments, err := h.s.GetCommentsAndReplies(q.QuantID)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": fmt.Errorf("error while converting quant id: %s", err),
-		})
+		sendErr(ctx, err)
 		return
 	}
-	comments, err := h.service.GetCommentsAndReplies(uint(quantID))
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"message": fmt.Errorf("error while getting comments: %s", err),
-		})
-		return
-	}
+
 	ctx.JSON(http.StatusOK, comments)
 }
 
 // CommentToQuant create a comment
 func (h *CommentHandler) CommentToQuant(ctx *gin.Context) {
+	var req model.Comment
+
 	user, err := getUserFromContext(ctx)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": fmt.Sprintf("error while getting user from request: %s", err),
-		})
+		sendErr(ctx, err)
 		return
 	}
-	var data struct {
-		QuantID uint   `json:"quant_id"`
-		Content string `json:"content"`
-	}
-	err = ctx.ShouldBindJSON(&data)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": fmt.Sprintf("error while parsing json: %s", err),
-		})
+
+	if err = ctx.ShouldBindJSON(&req); err != nil {
+		sendJsonParsingErr(ctx, err)
 		return
 	}
-	err = h.service.CreateComment(user.ID, data.QuantID, data.Content)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"message": fmt.Sprintf("error while creating comment"),
-		})
+
+	if err = h.s.CreateComment(user.ID, &req); err != nil {
+		sendErr(ctx, err)
 		return
 	}
+
 	ctx.JSON(http.StatusCreated, nil)
+}
+
+// UpdateComment edit a comment
+func (h *CommentHandler) UpdateComment(ctx *gin.Context) {
+	var req model.Comment
+
+	user, err := getUserFromContext(ctx)
+	if err != nil {
+		sendErr(ctx, err)
+		return
+	}
+
+	if err = ctx.ShouldBindJSON(&req); err != nil {
+		sendJsonParsingErr(ctx, err)
+		return
+	}
+
+	if err = h.s.UpdateComment(user.ID, &req); err != nil {
+		sendErr(ctx, err)
+		return
+	}
+
+	ctx.JSON(http.StatusNoContent, nil)
 }
 
 // DeleteComment delete a comment
 func (h *CommentHandler) DeleteComment(ctx *gin.Context) {
-	object, exist := ctx.Get("object")
-	if !exist {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": "error while getting comment",
-		})
-		return
+	var req struct {
+		CommentID uint `json:"comment_id"`
 	}
-	comment, _ := object.(*models.Comment)
-	err := h.service.DeleteComment(comment.ID)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"message": fmt.Sprintf("error while deleting comment: %s", err),
-		})
-		return
-	}
-	ctx.JSON(http.StatusNoContent, nil)
-}
 
-// EditComment edit a comment
-func (h *CommentHandler) EditComment(ctx *gin.Context) {
-	object, exist := ctx.Get("object")
-	if !exist {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": "error while getting comment",
-		})
-		return
-	}
-	comment, _ := object.(*models.Comment)
-	dataInterface, _ := ctx.Get("data")
-	data, _ := dataInterface.(map[string]interface{})
-	contentInterface, exist := data["content"]
-	if !exist {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": "error while getting content interface",
-		})
-		return
-	}
-	content, ok := contentInterface.(string)
-	if !ok {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": "content type err",
-		})
-		return
-	}
-	err := h.service.UpdateComment(comment.ID, content)
+	user, err := getUserFromContext(ctx)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"message": fmt.Sprintf("error while updating comment: %s", err),
-		})
+		sendErr(ctx, err)
 		return
 	}
+
+	if err = ctx.ShouldBindJSON(&req); err != nil {
+		sendJsonParsingErr(ctx, err)
+		return
+	}
+
+	if err = h.s.DeleteComment(user.ID, req.CommentID); err != nil {
+		sendErr(ctx, err)
+		return
+	}
+
 	ctx.JSON(http.StatusNoContent, nil)
 }

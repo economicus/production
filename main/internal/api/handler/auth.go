@@ -1,9 +1,9 @@
 package handler
 
 import (
-	"economicus/internal/api/service"
-	"fmt"
 	"github.com/gin-gonic/gin"
+	"main/internal/api/service"
+	e "main/internal/core/error"
 	"net/http"
 )
 
@@ -17,24 +17,25 @@ func NewAuthHandler(s *service.AuthService) *AuthHandler {
 	}
 }
 
-// Login logs in user
-func (h *AuthHandler) Login(ctx *gin.Context) {
-	input := struct {
-		Email    string
-		Password string
+// LoginInLocal logs in user
+func (h *AuthHandler) LoginInLocal(ctx *gin.Context) {
+	req := struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
 	}{}
-	err := ctx.ShouldBindJSON(&input)
-	if err != nil && input.Email != "" && input.Password != "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": fmt.Sprintf("error while parsing json: %s", err),
-		})
+
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		sendJsonParsingErr(ctx, err)
 		return
 	}
-	token, err := h.service.Login(input.Email, input.Password)
+	if req.Email == "" || req.Password == "" {
+		sendErr(ctx, e.ErrMissingRequest)
+		return
+	}
+
+	token, err := h.service.LoginInLocal(req.Email, req.Password)
 	if err != nil {
-		ctx.JSON(http.StatusUnauthorized, gin.H{
-			"message": fmt.Sprintf("error while authenticating: %s", err),
-		})
+		sendErr(ctx, err)
 		return
 	}
 	ctx.JSON(http.StatusOK, token)
@@ -49,29 +50,20 @@ func (h *AuthHandler) Logout(ctx *gin.Context) {
 
 // RefreshToken refreshes access token
 func (h *AuthHandler) RefreshToken(ctx *gin.Context) {
-	var input map[string]string
-	err := ctx.ShouldBindJSON(&input)
+	var req struct {
+		RefreshToken string `json:"refresh_token"`
+	}
+
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		sendJsonParsingErr(ctx, err)
+		return
+	}
+
+	token, err := h.service.RefreshToken(req.RefreshToken)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": fmt.Sprintf("error while parsing json: %s", err),
-		})
+		sendErr(ctx, err)
 		return
 	}
-	refreshToken := input["refresh_token"]
-	if refreshToken == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": fmt.Sprintf("error while getting refreshToken: refreshToken is an empty string"),
-		})
-		return
-	}
-	accessToken, err := h.service.RefreshToken(refreshToken)
-	if err != nil {
-		ctx.JSON(http.StatusUnauthorized, gin.H{
-			"message": fmt.Sprintf("error while refreshing access token: %s", err),
-		})
-		return
-	}
-	ctx.JSON(http.StatusOK, gin.H{
-		"access_token": accessToken,
-	})
+
+	ctx.JSON(http.StatusOK, token)
 }
