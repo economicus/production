@@ -50,7 +50,6 @@ func (s *QuantService) CreateQuant(userID uint, request *models.QuantRequest) (*
 	}
 
 	request.QuantID = quantID
-	request.QuantID = uint(1505)
 	option := request.ToQuantOption()
 
 	if err = s.repo.CreateQuantOption(option); err != nil {
