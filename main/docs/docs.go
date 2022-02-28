@@ -473,7 +473,7 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "201": {
+                    "204": {
                         "description": ""
                     },
                     "400": {

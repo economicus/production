@@ -18,7 +18,7 @@ import "main/docs"
 // @BasePath  /v1
 
 // @securityDefinitions.basic  JWT
-// @schemes https http
+// @schemes                    https http
 
 func main() {
 	docs.SwaggerInfo.Title = "Economicus Main Server API"

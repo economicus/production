@@ -23,13 +23,13 @@ func NewAuthHandler(s *service.AuthService) *AuthHandler {
 // @Tags         auth
 // @Accept       json
 // @Produce      json
-// @Param        email body string true "User login email"
-// @Param        password body string true "User login password"
-// @Success      200  {object}  jwt.Token
-// @Failure      400  {object}  httpError "Bad request error"
-// @Failure      401  {object}  httpError "Unauthorized error"
-// @Failure      404  {object}  httpError "Not found error"
-// @Failure      500  {object}  httpError "Internal server error"
+// @Param        email     body      string  true  "User login email"
+// @Param        password  body      string  true  "User login password"
+// @Success      200       {object}  jwt.Token
+// @Failure      400       {object}  httpError  "Bad request error"
+// @Failure      401       {object}  httpError  "Unauthorized error"
+// @Failure      404       {object}  httpError  "Not found error"
+// @Failure      500       {object}  httpError  "Internal server error"
 // @Router       /login [post]
 func (h *AuthHandler) LoginInLocal(ctx *gin.Context) {
 	req := struct {
@@ -66,12 +66,12 @@ func (h *AuthHandler) Logout(ctx *gin.Context) {
 // @Tags         auth
 // @Accept       json
 // @Produce      json
-// @Param        refresh_token body string true "Refresh token"
-// @Success      200  {object}  string "refreshed access token"
-// @Failure      400  {object}  httpError "Bad request error"
-// @Failure      401  {object}  httpError "Unauthorized error"
-// @Failure      404  {object}  httpError "Not found error"
-// @Failure      500  {object}  httpError "Internal server error"
+// @Param        refresh_token  body      string     true  "Refresh token"
+// @Success      200            {object}  string     "refreshed access token"
+// @Failure      400            {object}  httpError  "Bad request error"
+// @Failure      401            {object}  httpError  "Unauthorized error"
+// @Failure      404            {object}  httpError  "Not found error"
+// @Failure      500            {object}  httpError  "Internal server error"
 // @Router       /refresh-token [post]
 func (h *AuthHandler) RefreshToken(ctx *gin.Context) {
 	var req struct {
