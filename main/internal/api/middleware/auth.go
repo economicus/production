@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
-	db "main/internal/conf/db/mysql"
+	"main/internal/conf/db/mysql"
 	"main/internal/core/model"
 	"main/internal/pkg/jwt"
 	"net/http"
@@ -12,10 +12,10 @@ import (
 )
 
 type AuthMiddleware struct {
-	db *db.MySql
+	db *mysql.DB
 }
 
-func NewAuthMiddleware(db *db.MySql) *AuthMiddleware {
+func NewAuthMiddleware(db *mysql.DB) *AuthMiddleware {
 	return &AuthMiddleware{
 		db: db,
 	}

@@ -19,17 +19,20 @@ type App struct {
 }
 
 func New() *App {
+	log.SetFlags(log.Ltime | log.Lshortfile)
+	log.SetPrefix("[WARNING] ")
+
 	domain := os.Getenv("DOMAIN")
 	if domain == "" {
-		log.Println("[WARNING] MISSING APP ENV: empty domain")
+		log.Println("MISSING APP ENV: empty domain")
 	}
 	port := os.Getenv("INSECURE_PORT")
 	if port == "" {
-		log.Println("[WARNING] MISSING APP ENV: empty insecure port")
+		log.Println("MISSING APP ENV: empty insecure port")
 	}
 	version := os.Getenv("APP_VERSION")
 	if version == "" {
-		log.Println("[WARNING] MISSING APP ENV: empty app version")
+		log.Println("MISSING APP ENV: empty app version")
 	}
 	return &App{
 		InProduction: *inProduction,

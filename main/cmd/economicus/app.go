@@ -3,23 +3,23 @@ package main
 import (
 	"main/internal/api"
 	"main/internal/conf"
-	db "main/internal/conf/db/mysql"
+	"main/internal/conf/db/mysql"
 )
 
 type App struct {
 	config *conf.App
-	mysql  *db.MySql
+	mysql  *mysql.DB
 	router *api.Router
 }
 
 func New() *App {
-	c := conf.New()
-	mysql := db.NewMySql()
-	router := api.New(c, mysql)
+	config := conf.New()
+	mysqlDB := mysql.New()
+	router := api.New(config, mysqlDB)
 
 	return &App{
-		config: c,
-		mysql:  mysql,
+		config: config,
+		mysql:  mysqlDB,
 		router: router,
 	}
 }

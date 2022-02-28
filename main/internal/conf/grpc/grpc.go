@@ -11,7 +11,7 @@ type Quant struct {
 	*conf
 }
 
-func NewQuantGrpc() *Quant {
+func New() *Quant {
 	q := Quant{}
 	q.conf = newConf()
 	return &q

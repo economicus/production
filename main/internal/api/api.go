@@ -6,7 +6,7 @@ import (
 	"log"
 	"main/internal/api/middleware"
 	"main/internal/conf"
-	db "main/internal/conf/db/mysql"
+	"main/internal/conf/db/mysql"
 	"time"
 )
 
@@ -15,10 +15,10 @@ var authMid *middleware.AuthMiddleware
 type Router struct {
 	engine *gin.Engine
 	app    *conf.App
-	db     *db.MySql
+	db     *mysql.DB
 }
 
-func New(app *conf.App, db *db.MySql) *Router {
+func New(app *conf.App, db *mysql.DB) *Router {
 	e := getEngine()
 	authMid = middleware.NewAuthMiddleware(db)
 	r := Router{
@@ -32,7 +32,7 @@ func New(app *conf.App, db *db.MySql) *Router {
 
 func (r *Router) Run() {
 	if err := r.engine.Run(":" + r.app.InsecurePort); err != nil {
-		log.Fatalf("error while running app: %v", err)
+		log.Panicf("error while running app: %v", err)
 	}
 }
 
@@ -47,7 +47,7 @@ func (r *Router) getGroupWithAuth() *gin.RouterGroup {
 func getEngine() *gin.Engine {
 	e := gin.Default()
 	e.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://www.economicus.kr", "https://www.economicus.kr"},
+		AllowOrigins:     []string{"https://www.economicus.kr"},
 		AllowMethods:     []string{"PUT", "PATCH", "GET", "POST", "DELETE"},
 		AllowHeaders:     []string{"Content-Type", "Authorization", "Origin"},
 		ExposeHeaders:    []string{"Content-Length"},

@@ -16,12 +16,12 @@ type Aws struct {
 	Uploader *s3manager.Uploader
 }
 
-func NewAws() *Aws {
+func New() *Aws {
 	a := Aws{}
 	a.conf = newConf()
 	sess, err := session.NewSession(a.conf.getAwsConfig())
 	if err != nil {
-		log.Fatalf("error while connecting aws: %v", err)
+		log.Panicf("error while connecting aws: %v", err)
 	}
 	uploader := s3manager.NewUploader(sess)
 	return &Aws{

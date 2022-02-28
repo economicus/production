@@ -1,4 +1,4 @@
-package db
+package mysql
 
 import (
 	"fmt"
@@ -16,6 +16,9 @@ type conf struct {
 }
 
 func newConf() conf {
+	log.SetFlags(log.Ltime | log.Lshortfile)
+	log.SetPrefix("[WARNING] ")
+
 	dial := os.Getenv("DB_DIAL")
 	host := os.Getenv("DB_HOST")
 	port := os.Getenv("DB_PORT")

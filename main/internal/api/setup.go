@@ -41,7 +41,7 @@ func (r *Router) setupAuth() {
 }
 
 func (r *Router) setupUser() {
-	a := aws.NewAws()
+	a := aws.New()
 	rp := repo.NewUser(r.db.DB, a)
 	sv := service.NewUserService(rp, a)
 	hdr := handler.NewUserHandler(sv)

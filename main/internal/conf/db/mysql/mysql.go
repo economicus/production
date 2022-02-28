@@ -1,4 +1,4 @@
-package db
+package mysql
 
 import (
 	"database/sql"
@@ -17,13 +17,13 @@ const (
 	maxDBLifeTime = 5 * time.Minute
 )
 
-type MySql struct {
+type DB struct {
 	conf
 	DB *gorm.DB
 }
 
-func NewMySql() *MySql {
-	ms := MySql{}
+func New() *DB {
+	ms := DB{}
 	ms.conf = newConf()
 	ms.openGorm()
 	ms.setup()
@@ -31,15 +31,15 @@ func NewMySql() *MySql {
 	return &ms
 }
 
-func (ms *MySql) GetSqlDB() *sql.DB {
+func (ms *DB) GetSqlDB() *sql.DB {
 	db, err := ms.DB.DB()
 	if err != nil {
-		log.Fatalf("error while getting sql db: %v", err)
+		log.Panicf("error while getting sql db: %v", err)
 	}
 	return db
 }
 
-func (ms *MySql) openGorm() {
+func (ms *DB) openGorm() {
 	var err error
 	dsn := ms.conf.GetDSN()
 
@@ -53,17 +53,17 @@ func (ms *MySql) openGorm() {
 			time.Sleep(1 * time.Second)
 		}
 	}
-	log.Fatalf("error while opening mysql with dsn '%s': %v", dsn, err)
+	log.Panicf("error while opening mysql with dsn '%s': %v", dsn, err)
 }
 
-func (ms *MySql) setup() {
+func (ms *DB) setup() {
 	mysqlDB := ms.GetSqlDB()
 	mysqlDB.SetMaxOpenConns(maxOpenDBConn)
 	mysqlDB.SetMaxIdleConns(maxIdleDBConn)
 	mysqlDB.SetConnMaxLifetime(maxDBLifeTime)
 }
 
-func (ms *MySql) testDBConnection() {
+func (ms *DB) testDBConnection() {
 	for i := 0; i < maxIter; i++ {
 		if err := ms.GetSqlDB().Ping(); err == nil {
 			fmt.Println("===== Pinged database successfully! =====")
@@ -73,10 +73,10 @@ func (ms *MySql) testDBConnection() {
 			time.Sleep(1 * time.Second)
 		}
 	}
-	log.Fatalf("error while testing connection: tried %d times but failed", maxIter)
+	log.Panicf("error while testing connection: tried %d times but failed", maxIter)
 }
 
-func (ms *MySql) Migrate(objs []interface{}) {
+func (ms *DB) Migrate(objs []interface{}) {
 	for i := range objs {
 		if err := ms.DB.AutoMigrate(objs[i]); err != nil {
 			log.Fatalf("error while auto migration: %v", err)

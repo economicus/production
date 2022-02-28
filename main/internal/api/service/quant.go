@@ -17,7 +17,7 @@ type QuantService struct {
 func NewQuantService(repo *repo.QuantRepo) *QuantService {
 	return &QuantService{
 		repo: repo,
-		grpc: g.NewQuantGrpc(),
+		grpc: g.New(),
 	}
 }
 

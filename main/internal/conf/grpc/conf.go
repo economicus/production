@@ -14,15 +14,18 @@ type conf struct {
 }
 
 func newConf() *conf {
+	log.SetFlags(log.Ltime | log.Lshortfile)
+	log.SetPrefix("[WARNING] ")
+
 	host := os.Getenv("GRPC_HOST")
 	port := os.Getenv("GRPC_INSECURE_PORT")
 
 	if host == "" {
-		log.Println("[WARNING] MISSING GRPC ENV: empty host")
+		log.Println("MISSING GRPC ENV: empty host")
 		host = "172.17.0.1"
 	}
 	if port == "" {
-		log.Println("[WARNING] MISSING GRPC ENV: empty port")
+		log.Println("MISSING GRPC ENV: empty port")
 		port = "9000"
 	}
 	return &conf{

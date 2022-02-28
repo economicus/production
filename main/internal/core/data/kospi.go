@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"encoding/csv"
 	"log"
-	"main/internal/pkg/logger"
 	"os"
 	"strconv"
 	"time"
@@ -22,28 +21,28 @@ type Kospi struct {
 func NewKospi() *Kospi {
 	file, err := os.Open("internal/core/data/kospi.csv")
 	if err != nil {
-		log.Printf("error while open kospi: %v", err)
+		log.Panicf("error while open kospi: %v", err)
 	}
 
 	r := csv.NewReader(bufio.NewReader(file))
 	rows, err := r.ReadAll()
 	if err != nil {
-		log.Printf("error while reading kospi: %v", err)
+		log.Panicf("error while reading kospi: %v", err)
 	}
 
 	k := Kospi{
-		make(map[time.Time]int),
-		[]float32{},
+		Date:     make(map[time.Time]int),
+		IndexVal: []float32{},
 	}
 
 	for i := range rows {
 		t, err := time.Parse(layout, rows[i][0])
 		if err != nil {
-			logger.Logger.Errorf("error while parsing time: %v", err)
+			log.Panicf("error while parsing time: %v", err)
 		}
 		f, err := strconv.ParseFloat(rows[i][1], 32)
 		if err != nil {
-			logger.Logger.Errorf("error while parsing index value: %v", err)
+			log.Panicf("error while parsing index value: %v", err)
 		}
 		k.Date[t] = i
 		k.IndexVal = append(k.IndexVal, float32(f))
