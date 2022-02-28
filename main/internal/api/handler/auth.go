@@ -33,8 +33,8 @@ func NewAuthHandler(s *service.AuthService) *AuthHandler {
 // @Router       /login [post]
 func (h *AuthHandler) LoginInLocal(ctx *gin.Context) {
 	req := struct {
-		Email    string `json:"email"`
-		Password string `json:"password"`
+		Email    string `json:"email" example:"example@economicus.kr"`
+		Password string `json:"password" example:"some password"`
 	}{}
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -75,7 +75,7 @@ func (h *AuthHandler) Logout(ctx *gin.Context) {
 // @Router       /refresh-token [post]
 func (h *AuthHandler) RefreshToken(ctx *gin.Context) {
 	var req struct {
-		RefreshToken string `json:"refresh_token"`
+		RefreshToken string `json:"refresh_token" example:"some refresh token"`
 	}
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
