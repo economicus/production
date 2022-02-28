@@ -1,9 +1,9 @@
 package handler
 
 import (
-	"economicus/internal/api/service"
-	"fmt"
 	"github.com/gin-gonic/gin"
+	"main/internal/api/service"
+	e "main/internal/core/error"
 	"net/http"
 )
 
@@ -17,61 +17,77 @@ func NewAuthHandler(s *service.AuthService) *AuthHandler {
 	}
 }
 
-// Login logs in user
-func (h *AuthHandler) Login(ctx *gin.Context) {
-	input := struct {
-		Email    string
-		Password string
+// LoginInLocal godoc
+// @Summary      Local login
+// @Description  이메일, 비밀번호로 로그인하기
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        email     body      string  true  "User login email"
+// @Param        password  body      string  true  "User login password"
+// @Success      200       {object}  jwt.Token
+// @Failure      400       {object}  httpError  "Bad request error"
+// @Failure      401       {object}  httpError  "Unauthorized error"
+// @Failure      404       {object}  httpError  "Not found error"
+// @Failure      500       {object}  httpError  "Internal server error"
+// @Router       /login [post]
+func (h *AuthHandler) LoginInLocal(ctx *gin.Context) {
+	req := struct {
+		Email    string `json:"email" example:"example@economicus.kr"`
+		Password string `json:"password" example:"some password"`
 	}{}
-	err := ctx.ShouldBindJSON(&input)
-	if err != nil && input.Email != "" && input.Password != "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": fmt.Sprintf("error while parsing json: %s", err),
-		})
+
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		sendJsonParsingErr(ctx, err)
 		return
 	}
-	token, err := h.service.Login(input.Email, input.Password)
+	if req.Email == "" || req.Password == "" {
+		sendErr(ctx, e.ErrMissingRequest)
+		return
+	}
+
+	token, err := h.service.LoginInLocal(req.Email, req.Password)
 	if err != nil {
-		ctx.JSON(http.StatusUnauthorized, gin.H{
-			"message": fmt.Sprintf("error while authenticating: %s", err),
-		})
+		sendErr(ctx, err)
 		return
 	}
 	ctx.JSON(http.StatusOK, token)
 }
 
-// Logout logs out user
 func (h *AuthHandler) Logout(ctx *gin.Context) {
 	ctx.JSON(http.StatusNotFound, gin.H{
-		"message": "not set up yet",
+		"Message": "not set up yet",
 	})
 }
 
-// RefreshToken refreshes access token
+// RefreshToken godoc
+// @Summary      Refresh jwt token
+// @Description  Access token 기간 만료시, Refresh token을 사용하여 jwt 토큰 재발급
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        refresh_token  body      string     true  "Refresh token"
+// @Success      200            {object}  string     "refreshed access token"
+// @Failure      400            {object}  httpError  "Bad request error"
+// @Failure      401            {object}  httpError  "Unauthorized error"
+// @Failure      404            {object}  httpError  "Not found error"
+// @Failure      500            {object}  httpError  "Internal server error"
+// @Router       /refresh-token [post]
 func (h *AuthHandler) RefreshToken(ctx *gin.Context) {
-	var input map[string]string
-	err := ctx.ShouldBindJSON(&input)
+	var req struct {
+		RefreshToken string `json:"refresh_token" example:"some refresh token"`
+	}
+
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		sendJsonParsingErr(ctx, err)
+		return
+	}
+
+	token, err := h.service.RefreshToken(req.RefreshToken)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": fmt.Sprintf("error while parsing json: %s", err),
-		})
+		sendErr(ctx, err)
 		return
 	}
-	refreshToken := input["refresh_token"]
-	if refreshToken == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": fmt.Sprintf("error while getting refreshToken: refreshToken is an empty string"),
-		})
-		return
-	}
-	accessToken, err := h.service.RefreshToken(refreshToken)
-	if err != nil {
-		ctx.JSON(http.StatusUnauthorized, gin.H{
-			"message": fmt.Sprintf("error while refreshing access token: %s", err),
-		})
-		return
-	}
-	ctx.JSON(http.StatusOK, gin.H{
-		"access_token": accessToken,
-	})
+
+	ctx.JSON(http.StatusOK, token)
 }

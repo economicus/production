@@ -1,25 +1,23 @@
 package middleware
 
 import (
-	"economicus/internal/api/token"
-	"economicus/internal/drivers"
-	"economicus/internal/models"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
+	"main/internal/conf/db/mysql"
+	"main/internal/core/model"
+	"main/internal/pkg/jwt"
 	"net/http"
 	"strings"
 )
 
 type AuthMiddleware struct {
-	db  *drivers.DB
-	jwt *token.JwtManager
+	db *mysql.DB
 }
 
-func NewAuthMiddleware(db *drivers.DB, jwt *token.JwtManager) *AuthMiddleware {
+func NewAuthMiddleware(db *mysql.DB) *AuthMiddleware {
 	return &AuthMiddleware{
-		db:  db,
-		jwt: jwt,
+		db: db,
 	}
 }
 
@@ -27,35 +25,29 @@ func (m *AuthMiddleware) Authenticate() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		accessToken, err := extractAccessToken(ctx.Request)
 		if err != nil {
-			ctx.JSON(http.StatusBadRequest, gin.H{
-				"message": fmt.Sprintf("error while extracting access token: %s", err),
-			})
-			ctx.Abort()
+			abortErr(ctx, err)
 			return
 		}
-		userID, err := m.jwt.Validate(accessToken)
+
+		userID, err := jwt.Validate(accessToken, "access")
 		if err != nil {
-			ctx.JSON(http.StatusUnauthorized, gin.H{
-				"message": err.Error(),
-			})
-			ctx.Abort()
+			abortErr(ctx, err)
 			return
 		}
-		user, err := getUserByID(m.db.SQL, userID)
+
+		user, err := getUserByID(m.db.DB, userID)
 		if err != nil {
-			ctx.JSON(http.StatusNotFound, gin.H{
-				"message": fmt.Sprintf("error while finding a user: %s", err),
-			})
-			ctx.Abort()
+			abortErr(ctx, err)
 			return
 		}
+
 		ctx.Set("user", *user)
 		ctx.Next()
 	}
 }
 
-func getUserByID(db *gorm.DB, userID uint) (*models.User, error) {
-	var user models.User
+func getUserByID(db *gorm.DB, userID uint) (*model.User, error) {
+	var user model.User
 	err := db.First(&user, userID).Error
 	if err != nil {
 		return nil, err

@@ -23,12 +23,14 @@ economicus-fe 서브모듈을 최신 버전으로 업데이트 하고 싶은 경
 git submodule update --remote
 ```
 
-위와 같이 서브모듈 업데이트 후 commit을 하면, production 레포지토리에 반영됩니다.
+위와 같이 서브모듈 업데이트 후 commit하면, production 레포지토리에 반영됩니다.
 
 ```shell
 git add .
 git commit -m "chore: economicus-fe update" # 커밋 메세지는 마음대로 작성해주세요.
 ```
+
+❗ `git submodule update --remote`는 필요할 때에만 해주세요! 일반적으로는 프론트엔드 작업자가 production 레포지토리에 업데이트하고 commit 했을 것이므로 `git pull`만 해도 되는 듯...합니다.
 
 ### frontend 작업 방법
 

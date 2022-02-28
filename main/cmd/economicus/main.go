@@ -1,52 +1,33 @@
 package main
 
-import (
-	"economicus/config"
-	"economicus/internal/api"
-	"economicus/internal/drivers"
-	"log"
-)
+import "main/docs"
 
-const port = "8080"
+// @title           Economicus Main Server
+// @version         1.0.0
+// @description     Economicus 메인 서버
+// @termsOfService  https://www.economicus.kr/
 
-type App struct {
-	config   *config.AppConfig
-	database *drivers.DB
-	routes   *api.Manager
-}
+// @contact.name   API Support
+// @contact.url    http://www.swagger.io/support
+// @contact.email  support@swagger.io
 
-func NewApp() *App {
-	c := config.NewAppConfig()
-	db := drivers.NewDatabase()
-	routes := api.NewManager(c, db)
+// @license.name  Apache 2.0
+// @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
 
-	return &App{
-		config:   c,
-		database: db,
-		routes:   routes,
-	}
-}
+// @host      localhost:8080
+// @BasePath  /v1
 
-func (app *App) Setup() {
-	app.routes.Setup()
-}
-
-func (app *App) Run() {
-	if err := app.routes.Run(port); err != nil {
-		log.Fatalf("error while running server on %s", port)
-	}
-}
-
-func (app *App) PrintInfo() {
-	app.config.PrintInfo()
-	app.database.Config.PrintInfo()
-}
+// @securityDefinitions.basic  JWT
+// @schemes                    https http
 
 func main() {
-	app := NewApp()
-	if !app.config.InProduction {
-		app.PrintInfo()
-	}
-	app.Setup()
+	docs.SwaggerInfo.Title = "Economicus Main Server API"
+	docs.SwaggerInfo.Description = "Economicus 메인 서버 API"
+	docs.SwaggerInfo.Version = "1.0.0"
+	docs.SwaggerInfo.Host = "localhost:8080"
+	docs.SwaggerInfo.BasePath = "/v1"
+	docs.SwaggerInfo.Schemes = []string{"http", "https"}
+
+	app := New()
 	app.Run()
 }
