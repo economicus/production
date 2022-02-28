@@ -47,7 +47,7 @@ func (r *Router) getGroupWithAuth() *gin.RouterGroup {
 func getEngine() *gin.Engine {
 	e := gin.Default()
 	e.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"https://www.economicus.kr"},
+		AllowOrigins:     []string{"http://localhost:3000", "https://www.economicus.kr"},
 		AllowMethods:     []string{"PUT", "PATCH", "GET", "POST", "DELETE"},
 		AllowHeaders:     []string{"Content-Type", "Authorization", "Origin"},
 		ExposeHeaders:    []string{"Content-Length"},
