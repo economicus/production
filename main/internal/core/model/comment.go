@@ -1,6 +1,9 @@
 package model
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+	"main/internal/pkg/objconv"
+)
 
 type Comments []Comment
 
@@ -29,9 +32,9 @@ func (c *Comment) GetOwnerID() uint {
 }
 
 func (c *Comment) ToMap() map[string]interface{} {
-	return ToMap(c)
+	return objconv.ToMap(c)
 }
 
 func (c *Comment) ToMapWithFields(fields []string) map[string]interface{} {
-	return toMapWithFields(c, fields)
+	return objconv.ToMapWithFields(c, fields)
 }

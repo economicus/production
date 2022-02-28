@@ -20,12 +20,20 @@ func NewAuthRepo(db *gorm.DB) *AuthRepo {
 	}
 }
 
-func (repo *AuthRepo) RefreshToken(refreshToken string) (*jwt.Token, error) {
+func (repo *AuthRepo) RefreshToken(refreshToken string) (string, error) {
 	userID, err := jwt.Validate(refreshToken, "refresh")
 	if err != nil {
-		return nil, err
+		return "", err
 	}
-	return jwt.NewTokenPair(userID)
+	if err = repo.db.First(&model.User{}, userID).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return "", e.ErrNoUserFound
+		} else if err != nil {
+			logger.Logger.Errorf("error in RefreshToken: %v\n", err)
+			return "", err
+		}
+	}
+	return jwt.NewAccessToken(userID)
 }
 
 // AuthenticateInLocal authenticates user with email and password which stored in local database

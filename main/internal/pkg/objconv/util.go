@@ -1,4 +1,4 @@
-package model
+package objconv
 
 import (
 	"reflect"
@@ -36,7 +36,7 @@ func ToMap(object interface{}) map[string]interface{} {
 	return m
 }
 
-func toMapWithFields(object interface{}, fields []string) map[string]interface{} {
+func ToMapWithFields(object interface{}, fields []string) map[string]interface{} {
 	if len(fields) == 0 {
 		return ToMap(object)
 	}

@@ -3,6 +3,8 @@ package api
 import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"log"
 	"main/internal/api/middleware"
 	"main/internal/conf"
@@ -46,6 +48,7 @@ func (r *Router) getGroupWithAuth() *gin.RouterGroup {
 
 func getEngine() *gin.Engine {
 	e := gin.Default()
+	e.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	e.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:3000", "https://www.economicus.kr"},
 		AllowMethods:     []string{"PUT", "PATCH", "GET", "POST", "DELETE"},

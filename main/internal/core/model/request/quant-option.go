@@ -2,12 +2,11 @@ package request
 
 import (
 	"main/internal/core/model/quant"
+	"main/internal/pkg/objconv"
 	"time"
 )
 
-type QuantC struct {
-	QuantID             uint             `json:"-" swaggerignore:"true"`
-	Name                string           `json:"name,omitempty" example:"Model name"`
+type QuantOptU struct {
 	MainSectors         []string         `json:"main_sectors,omitempty" example:"IT,소재"`
 	NetRevenue          quant.IntPair    `json:"net_revenue,omitempty"`
 	NetRevenueRate      quant.DoublePair `json:"net_revenue_rate,omitempty"`
@@ -30,8 +29,6 @@ type QuantC struct {
 	EndDate             time.Time        `time_format:"2006-01-02T15:04:05.000Z" json:"end_date,omitempty" example:"2021-03-31T00:00:000.Z"`
 }
 
-type QuantE struct {
-	Active      bool   `json:"active,omitempty" example:"true"`
-	Name        string `json:"name,omitempty" example:"New model name"`
-	Description string `json:"description,omitempty" example:"New model description"`
+func (r *QuantOptU) ToMap() map[string]interface{} {
+	return objconv.ToMap(r)
 }

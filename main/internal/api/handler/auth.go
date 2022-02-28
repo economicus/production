@@ -17,7 +17,20 @@ func NewAuthHandler(s *service.AuthService) *AuthHandler {
 	}
 }
 
-// LoginInLocal logs in user
+// LoginInLocal godoc
+// @Summary      Local login
+// @Description  이메일, 비밀번호로 로그인하기
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        email body string true "User login email"
+// @Param        password body string true "User login password"
+// @Success      200  {object}  jwt.Token
+// @Failure      400  {object}  httpError "Bad request error"
+// @Failure      401  {object}  httpError "Unauthorized error"
+// @Failure      404  {object}  httpError "Not found error"
+// @Failure      500  {object}  httpError "Internal server error"
+// @Router       /login [post]
 func (h *AuthHandler) LoginInLocal(ctx *gin.Context) {
 	req := struct {
 		Email    string `json:"email"`
@@ -41,14 +54,25 @@ func (h *AuthHandler) LoginInLocal(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, token)
 }
 
-// Logout logs out user
 func (h *AuthHandler) Logout(ctx *gin.Context) {
 	ctx.JSON(http.StatusNotFound, gin.H{
-		"message": "not set up yet",
+		"Message": "not set up yet",
 	})
 }
 
-// RefreshToken refreshes access token
+// RefreshToken godoc
+// @Summary      Refresh jwt token
+// @Description  Access token 기간 만료시, Refresh token을 사용하여 jwt 토큰 재발급
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        refresh_token body string true "Refresh token"
+// @Success      200  {object}  string "refreshed access token"
+// @Failure      400  {object}  httpError "Bad request error"
+// @Failure      401  {object}  httpError "Unauthorized error"
+// @Failure      404  {object}  httpError "Not found error"
+// @Failure      500  {object}  httpError "Internal server error"
+// @Router       /refresh-token [post]
 func (h *AuthHandler) RefreshToken(ctx *gin.Context) {
 	var req struct {
 		RefreshToken string `json:"refresh_token"`

@@ -19,6 +19,6 @@ func (s *AuthService) LoginInLocal(email, password string) (*jwt.Token, error) {
 	return s.repo.AuthenticateInLocal(email, password)
 }
 
-func (s *AuthService) RefreshToken(refreshToken string) (*jwt.Token, error) {
+func (s *AuthService) RefreshToken(refreshToken string) (string, error) {
 	return s.repo.RefreshToken(refreshToken)
 }

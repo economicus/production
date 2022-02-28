@@ -2,6 +2,7 @@ package model
 
 import (
 	"gorm.io/gorm"
+	"main/internal/pkg/objconv"
 	"time"
 )
 
@@ -57,5 +58,5 @@ func (p *Profile) ToMap() map[string]interface{} {
 }
 
 func (p *Profile) ToMapWithFields(fields []string) map[string]interface{} {
-	return toMapWithFields(p, fields)
+	return objconv.ToMapWithFields(p, fields)
 }

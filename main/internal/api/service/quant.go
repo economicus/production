@@ -6,6 +6,7 @@ import (
 	"main/internal/core/model"
 	"main/internal/core/model/request"
 	"main/internal/core/model/response"
+	"main/internal/pkg/objconv"
 	"time"
 )
 
@@ -69,8 +70,8 @@ func (s *QuantService) getQuantResponse(req *model.QuantOption) (*response.Quant
 	return resp, nil
 }
 
-func (s *QuantService) UpdateQuant(userID uint, req *request.QuantE) error {
-	q, err := s.GetQuant(req.QuantID)
+func (s *QuantService) UpdateQuant(userID, quantID uint, req *request.QuantE) error {
+	q, err := s.GetQuant(quantID)
 	if err != nil {
 		return err
 	}
@@ -79,14 +80,14 @@ func (s *QuantService) UpdateQuant(userID uint, req *request.QuantE) error {
 		return err
 	}
 
-	reqBody := model.ToMap(req)
+	reqBody := objconv.ToMap(req)
 	reqBody["updated_at"] = time.Now()
 
 	return s.repo.UpdateQuant(q.ID, reqBody)
 }
 
-func (s *QuantService) UpdateQuantOption(userID uint, req *model.QuantOption) error {
-	q, err := s.GetQuant(req.QuantID)
+func (s *QuantService) UpdateQuantOption(userID, quantID uint, req *request.QuantOptU) error {
+	q, err := s.GetQuant(quantID)
 	if err != nil {
 		return err
 	}

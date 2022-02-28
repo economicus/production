@@ -6,6 +6,7 @@ import (
 	"main/internal/core/model/quant"
 	"main/internal/core/model/request"
 	"main/internal/core/pb"
+	"main/internal/pkg/objconv"
 	"time"
 )
 
@@ -28,24 +29,28 @@ type QuantOption struct {
 	Roa                 quant.DoublePair   `gorm:"embedded;embeddedPrefix:roa_" json:"roa"`
 	Roe                 quant.DoublePair   `gorm:"embedded;embeddedPrefix:roe_" json:"roe"`
 	MarketCap           quant.IntPair      `gorm:"embedded;embeddedPrefix:market_cap_" json:"market_cap"`
-	StartDate           time.Time          `time_format:"2006-01-02T15:04:05.000Z" json:"start_date"`
-	EndDate             time.Time          `time_format:"2006-01-02T15:04:05.000Z" json:"end_date"`
+	StartDate           time.Time          `time_format:"2006-01-02T15:04:05.000Z" json:"start_date" example:"2016-03-31T00:00:000.Z"`
+	EndDate             time.Time          `time_format:"2006-01-02T15:04:05.000Z" json:"end_date" example:"2021-03-31T00:00:000.Z"`
 }
 
 func NewQuantOption(req *request.QuantC) *QuantOption {
 	return &QuantOption{
-		QuantID:             req.QuantID,
-		MainSectors:         quant.NewMainSectors(req.QuantID, req.MainSectors),
-		NetRevenue:          req.NetRevenue,
-		NetRevenueRate:      req.NetRevenueRate,
-		NetProfit:           req.NetProfit,
-		NetProfitRate:       req.NetProfitRate,
-		DERatio:             req.DERatio,
-		Per:                 req.Per,
-		Psr:                 req.Psr,
-		Pbr:                 req.Pbr,
-		Pcr:                 req.Pcr,
-		Activities:          req.Activities,
+		QuantID:        req.QuantID,
+		MainSectors:    quant.NewMainSectors(req.QuantID, req.MainSectors),
+		NetRevenue:     req.NetRevenue,
+		NetRevenueRate: req.NetRevenueRate,
+		NetProfit:      req.NetProfit,
+		NetProfitRate:  req.NetProfitRate,
+		DERatio:        req.DERatio,
+		Per:            req.Per,
+		Psr:            req.Psr,
+		Pbr:            req.Pbr,
+		Pcr:            req.Pcr,
+		Activities: quant.Activities{
+			Operating: req.Operating,
+			Investing: req.Investing,
+			Financing: req.Financing,
+		},
 		DividendYield:       req.DividendYield,
 		DividendPayoutRatio: req.DividendPayoutRatio,
 		Roa:                 req.Roa,
@@ -84,7 +89,7 @@ func (q *QuantOption) ToRequest() *pb.QuantRequest {
 }
 
 func (q *QuantOption) ToMap() map[string]interface{} {
-	return ToMap(q)
+	return objconv.ToMap(q)
 }
 
 func (q *QuantOption) TableName() string {

@@ -2,20 +2,21 @@ package model
 
 import (
 	"gorm.io/gorm"
+	"main/internal/pkg/objconv"
 )
 
 type Quants []Quant
 
 type Quant struct {
-	gorm.Model  `json:"-"`
+	gorm.Model  `json:"-" swaggerignore:"true"`
 	UserID      uint        `json:"user_id"`
-	QuantOption QuantOption `gorm:"constraint:OnDelete:CASCADE;foreignKey:QuantID;references:ID" json:"-"`
-	Active      bool        `gorm:"column:active;default:false" json:"-"`
-	LikedUsers  []*User     `gorm:"many2many:user_favorite_quants;" json:"-"`
-	Name        string      `gorm:"column:name;not null;unique" json:"name"`
-	Description string      `gorm:"column:description" json:"description"`
-	Private     bool        `gorm:"column:private;default:false" json:"-"`
-	Comments    Comments    `gorm:"constraint:OnDelete:CASCADE;" json:"-"`
+	QuantOption QuantOption `gorm:"constraint:OnDelete:CASCADE;foreignKey:QuantID;references:ID" json:"-" swaggerignore:"true"`
+	Active      bool        `gorm:"column:active;default:false" json:"-" swaggerignore:"true"`
+	LikedUsers  []*User     `gorm:"many2many:user_favorite_quants;" json:"-" swaggerignore:"true"`
+	Name        string      `gorm:"column:name;not null;unique" json:"name" example:"quant model name"`
+	Description string      `gorm:"column:description" json:"description" example:"quant model description"`
+	Private     bool        `gorm:"column:private;default:false" json:"-" swaggerignore:"true"`
+	Comments    Comments    `gorm:"constraint:OnDelete:CASCADE;" json:"-" swaggerignore:"true"`
 }
 
 func NewQuant(userID uint, name string) *Quant {
@@ -34,9 +35,9 @@ func (q *Quant) GetOwnerID() uint {
 }
 
 func (q *Quant) ToMap() map[string]interface{} {
-	return ToMap(q)
+	return objconv.ToMap(q)
 }
 
 func (q *Quant) ToMapWithFields(fields []string) map[string]interface{} {
-	return toMapWithFields(q, fields)
+	return objconv.ToMapWithFields(q, fields)
 }

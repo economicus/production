@@ -1,6 +1,9 @@
 package model
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+	"main/internal/pkg/objconv"
+)
 
 type Replies []Reply
 
@@ -28,9 +31,9 @@ func (r *Reply) GetOwnerID() uint {
 }
 
 func (r *Reply) ToMap() map[string]interface{} {
-	return ToMap(r)
+	return objconv.ToMap(r)
 }
 
 func (r *Reply) ToMapWithFields(fields []string) map[string]interface{} {
-	return toMapWithFields(r, fields)
+	return objconv.ToMapWithFields(r, fields)
 }

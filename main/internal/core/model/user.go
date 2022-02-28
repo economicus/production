@@ -3,6 +3,7 @@ package model
 import (
 	"gorm.io/gorm"
 	"main/internal/pkg/logger"
+	"main/internal/pkg/objconv"
 	"main/internal/pkg/pwd"
 	"time"
 )
@@ -55,9 +56,9 @@ func (u *User) GetOwnerID() uint {
 }
 
 func (u *User) ToMap() map[string]interface{} {
-	return ToMap(u)
+	return objconv.ToMap(u)
 }
 
 func (u *User) ToMapWithFields(fields []string) map[string]interface{} {
-	return toMapWithFields(u, fields)
+	return objconv.ToMapWithFields(u, fields)
 }

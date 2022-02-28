@@ -6,8 +6,8 @@ import (
 )
 
 type Err struct {
-	Code     int
-	Msg      string
+	Code     int    `json:"-"`
+	Msg      string `json:"message"`
 	httpCode int
 }
 

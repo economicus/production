@@ -3,8 +3,8 @@ package quant
 import "main/internal/core/pb"
 
 type IntPair struct {
-	Max int64 `json:"max"`
-	Min int64 `json:"min"`
+	Max int64 `json:"max" example:"-10000"`
+	Min int64 `json:"min" example:"1000000"`
 }
 
 func (ip *IntPair) ToPB() *pb.IntPair {
@@ -15,8 +15,8 @@ func (ip *IntPair) ToPB() *pb.IntPair {
 }
 
 type DoublePair struct {
-	Max float32 `json:"max"`
-	Min float32 `json:"min"`
+	Max float32 `json:"max" example:"-100.01"`
+	Min float32 `json:"min" example:"100.01"`
 }
 
 func (dp *DoublePair) ToPB() *pb.DoublePair {
