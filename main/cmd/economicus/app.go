@@ -3,6 +3,7 @@ package main
 import (
 	"main/internal/api"
 	"main/internal/conf"
+	"main/internal/conf/db/mongo"
 	"main/internal/conf/db/mysql"
 )
 
@@ -15,7 +16,8 @@ type App struct {
 func New() *App {
 	config := conf.New()
 	mysqlDB := mysql.New()
-	router := api.New(config, mysqlDB)
+	mongoDB := mongo.New()
+	router := api.New(config, mysqlDB, mongoDB)
 
 	return &App{
 		config: config,

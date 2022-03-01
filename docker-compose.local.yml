@@ -9,7 +9,7 @@ services:
     restart: always
     env_file: .env
     links:
-      - "db:mysqldb"
+      - "mysql:mysql"
     depends_on:
       - quant
       - db
@@ -27,16 +27,22 @@ services:
       - "9000:9000"
     command: python3 main.py
 
-  db:
+  mysql:
     platform: linux/x86_64
     image: mysql:5.7
-    container_name: database
+    container_name: mysql
     user: "501:20"
     restart: always
     env_file: .env.mysql
-    ports:
-      - "3306:3306"
     volumes:
       - ./volumes/mysql:/var/lib/mysql
-      - ./volumes/seed:/var/lib/mysql-files
     command: mysqld --character-set-server=utf8 --collation-server=utf8_unicode_ci --init-connect='SET NAMES UTF8;' --innodb-flush-log-at-trx-commit=0
+
+  mongo:
+    image: mongo
+    container_name: mongo
+    env_file: .env.mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./volumes/mongo:/data/db
