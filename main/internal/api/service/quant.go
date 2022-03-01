@@ -1,13 +1,13 @@
 package service
 
 import (
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"main/internal/api/repo"
 	g "main/internal/conf/grpc"
 	"main/internal/core/model"
 	"main/internal/core/model/request"
 	"main/internal/core/model/response"
 	"main/internal/pkg/objconv"
-	"time"
 )
 
 type QuantService struct {
@@ -52,7 +52,24 @@ func (s *QuantService) CreateQuant(userID uint, req *request.QuantC) (*response.
 		return nil, err
 	}
 
-	return s.getQuantResponse(option)
+	resp, err := s.getQuantResponse(option)
+	if err != nil {
+		return nil, err
+	}
+
+	resId, err := s.repo.CreateQuantResult(resp)
+	if err != nil {
+		return nil, err
+	}
+
+	m := make(map[string]interface{})
+	m["data_id"] = resId.(primitive.ObjectID).Hex()
+
+	if err = s.repo.UpdateQuant(quantID, m); err != nil {
+		return nil, err
+	}
+
+	return resp, nil
 }
 
 func (s *QuantService) getQuantResponse(req *model.QuantOption) (*response.QuantResponse, error) {
@@ -81,7 +98,6 @@ func (s *QuantService) UpdateQuant(userID, quantID uint, req *request.QuantE) er
 	}
 
 	reqBody := objconv.ToMap(req)
-	reqBody["updated_at"] = time.Now()
 
 	return s.repo.UpdateQuant(q.ID, reqBody)
 }

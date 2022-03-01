@@ -1,4 +1,4 @@
-package mysql
+package mongo
 
 import (
 	"fmt"
@@ -19,8 +19,8 @@ func newConf() conf {
 	log.SetFlags(log.Ltime | log.Lshortfile)
 	log.SetPrefix("[WARNING] ")
 
-	host := os.Getenv("DB_HOST")
-	port := os.Getenv("DB_PORT")
+	host := os.Getenv("MONGO_HOST")
+	port := os.Getenv("MONGO_PORT")
 	user := os.Getenv("DB_USER")
 	pwd := os.Getenv("DB_PASSWORD")
 	name := os.Getenv("DB_NAME")
@@ -31,7 +31,7 @@ func newConf() conf {
 	}
 	if port == "" {
 		log.Println("MISSING DATABASE ENV: empty port\nChange to default port 3306")
-		port = "3306"
+		port = "27017"
 	}
 	if user == "" {
 		log.Println("MISSING DATABASE ENV: empty user\nChange to default user root")
@@ -46,7 +46,7 @@ func newConf() conf {
 		name = "economicus"
 	}
 	return conf{
-		dial: "mysql",
+		dial: "mongodb",
 		user: user,
 		pwd:  pwd,
 		host: host,
@@ -56,7 +56,7 @@ func newConf() conf {
 }
 
 func (c conf) GetDSN() string {
-	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", c.user, c.pwd, c.host, c.port, c.name)
+	return fmt.Sprintf("%s://%s:%s@%s:%s", c.dial, c.user, c.pwd, c.host, c.port)
 }
 
 func (c conf) Info() {

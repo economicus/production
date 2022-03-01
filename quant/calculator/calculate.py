@@ -171,7 +171,6 @@ class Calculate(DataLoad):
         winning_percentage = self.get_winning_percentage(chart)
         max_loss_rate = self.get_max_loss_rate(chart)
         holdings_count = self.get_holdings_count(code_list)
-        print(holdings_count)
         return_dict = dict(
             cumulative_return=chart[-1],
             annual_average_return=annual_average_return[-1],
@@ -189,7 +188,6 @@ class QuantCalc(FindCode, Calculate):
 
     def execute(self, **cond):
         code_list = self.apply_conditions(cond)
-        print(code_list)
         return_dict = self.calculate_profit(code_list, cond)
         print(return_dict)
         return return_dict

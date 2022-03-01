@@ -11,6 +11,7 @@ type Quant struct {
 	gorm.Model  `json:"-" swaggerignore:"true"`
 	UserID      uint        `json:"user_id"`
 	QuantOption QuantOption `gorm:"constraint:OnDelete:CASCADE;foreignKey:QuantID;references:ID" json:"-" swaggerignore:"true"`
+	ResDataID   string      `gorm:"column:data_id" json:"-" swaggerignore:"true"`
 	Active      bool        `gorm:"column:active;default:false" json:"-" swaggerignore:"true"`
 	LikedUsers  []*User     `gorm:"many2many:user_favorite_quants;" json:"-" swaggerignore:"true"`
 	Name        string      `gorm:"column:name;not null;unique" json:"name" example:"quant model name"`

@@ -80,6 +80,7 @@ fabric.properties
 /volumes
 !/scripts/
 /.env.mysql
+/.env.mongo
 
 ## front
 # dependencies
@@ -103,5 +104,3 @@ fabric.properties
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-
-.env.mysql

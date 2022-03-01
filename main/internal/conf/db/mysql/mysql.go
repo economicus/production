@@ -28,6 +28,7 @@ func New() *DB {
 	ms.openGorm()
 	ms.setup()
 	ms.testDBConnection()
+	ms.Info()
 	return &ms
 }
 
@@ -49,11 +50,11 @@ func (ms *DB) openGorm() {
 			ms.DB = db
 			return
 		} else {
-			log.Println("MySQL connection has failed. Waiting for MySQL. Sleeping for a second...")
+			log.Println("MySQL connection has failed. Sleeping for a second...")
 			time.Sleep(1 * time.Second)
 		}
 	}
-	log.Panicf("error while opening mysql with dsn '%s': %v", dsn, err)
+	log.Panicf("error while connecting mysql with dsn '%s': %v", dsn, err)
 }
 
 func (ms *DB) setup() {
@@ -66,10 +67,10 @@ func (ms *DB) setup() {
 func (ms *DB) testDBConnection() {
 	for i := 0; i < maxIter; i++ {
 		if err := ms.GetSqlDB().Ping(); err == nil {
-			fmt.Println("===== Pinged database successfully! =====")
+			fmt.Println("[INFO] Pinged mysql successfully")
 			return
 		} else {
-			fmt.Println("Database has not been prepared yet. sleeping for a second...")
+			fmt.Println("[INFO] MySQL has not been prepared yet. Sleeping for a second...")
 			time.Sleep(1 * time.Second)
 		}
 	}
