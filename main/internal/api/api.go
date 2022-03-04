@@ -8,6 +8,7 @@ import (
 	"log"
 	"main/internal/api/middleware"
 	"main/internal/conf"
+	"main/internal/conf/db/mongo"
 	"main/internal/conf/db/mysql"
 	"time"
 )
@@ -15,18 +16,20 @@ import (
 var authMid *middleware.AuthMiddleware
 
 type Router struct {
-	engine *gin.Engine
-	app    *conf.App
-	db     *mysql.DB
+	engine  *gin.Engine
+	app     *conf.App
+	mysqlDB *mysql.DB
+	mongoDB *mongo.DB
 }
 
-func New(app *conf.App, db *mysql.DB) *Router {
+func New(app *conf.App, mysqlDB *mysql.DB, mongoDB *mongo.DB) *Router {
 	e := getEngine()
-	authMid = middleware.NewAuthMiddleware(db)
+	authMid = middleware.NewAuthMiddleware(mysqlDB)
 	r := Router{
-		engine: e,
-		app:    app,
-		db:     db,
+		engine:  e,
+		app:     app,
+		mysqlDB: mysqlDB,
+		mongoDB: mongoDB,
 	}
 	r.setAll()
 	return &r
