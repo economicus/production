@@ -1,0 +1,9 @@
+[submodule "main"]
+	path = main
+	url = https://github.com/economicus/backend-main.git
+[submodule "quant"]
+	path = quant
+	url = https://github.com/economicus/backend-quant.git
+[submodule "proto"]
+	path = proto
+    url = https://github.com/economicus/backend-proto.git
